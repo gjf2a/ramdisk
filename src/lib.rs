@@ -3,32 +3,34 @@
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum RamDiskResult {
     Ok,
-    IllegalBlock(usize)
+    IllegalBlock(usize),
 }
 
 impl RamDiskResult {
     pub fn unwrap(&self) {
         match self {
             RamDiskResult::Ok => {}
-            RamDiskResult::IllegalBlock(block) => panic!("Illegal disk block: {block}")
+            RamDiskResult::IllegalBlock(block) => panic!("Illegal disk block: {block}"),
         }
     }
 
     pub fn is_err(&self) -> bool {
         match self {
             RamDiskResult::Ok => false,
-            _ => true
+            _ => true,
         }
     }
 }
 
 pub struct RamDisk<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> {
-    blocks: [[u8; BLOCK_SIZE]; NUM_BLOCKS]
+    blocks: [[u8; BLOCK_SIZE]; NUM_BLOCKS],
 }
 
-impl <const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_BLOCKS> {
+impl<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_BLOCKS> {
     pub fn new() -> Self {
-        Self { blocks: [[0; BLOCK_SIZE]; NUM_BLOCKS]}
+        Self {
+            blocks: [[0; BLOCK_SIZE]; NUM_BLOCKS],
+        }
     }
 
     pub fn num_blocks(&self) -> usize {
@@ -44,26 +46,35 @@ impl <const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_
     }
 
     pub fn read(&self, block: usize, buffer: &mut [u8; BLOCK_SIZE]) -> RamDiskResult {
-        self.blocks.get(block).map_or(RamDiskResult::IllegalBlock(block), |found| {
-            *buffer = *found;
-            RamDiskResult::Ok
-        })
+        match self.blocks.get(block) {
+            Some(found) => {
+                *buffer = *found;
+                RamDiskResult::Ok
+            }
+            None => RamDiskResult::IllegalBlock(block),
+        }
     }
 
     pub fn write(&mut self, block: usize, buffer: &[u8; BLOCK_SIZE]) -> RamDiskResult {
-        self.blocks.get_mut(block).map_or(RamDiskResult::IllegalBlock(block), |found| {
-            *found = *buffer;
-            RamDiskResult::Ok
-        })
+        match self.blocks.get_mut(block) {
+            Some(found) => {
+                *found = *buffer;
+                RamDiskResult::Ok
+            }
+            None => RamDiskResult::IllegalBlock(block),
+        }
     }
 
     pub fn write_from_str(&mut self, block: usize, contents: &str) -> RamDiskResult {
-        self.blocks.get_mut(block).map_or(RamDiskResult::IllegalBlock(block), |found| {
-            for (i, byte) in contents.as_bytes().iter().enumerate().take(BLOCK_SIZE) {
-                found[i] = *byte;
+        match self.blocks.get_mut(block) {
+            Some(found) => {
+                for (i, byte) in contents.as_bytes().iter().enumerate().take(BLOCK_SIZE) {
+                    found[i] = *byte;
+                }
+                RamDiskResult::Ok
             }
-            RamDiskResult::Ok
-        })
+            None => RamDiskResult::IllegalBlock(block),
+        }
     }
 }
 
@@ -75,7 +86,7 @@ mod tests {
     const TEST_BLOCK_SIZE: usize = TEST_TEXT_1.len();
     const TEST_TEXT_2: &str = "This is a test?!";
     const TEST_TEXT_3: &str = "This is far too long to use.";
-    
+
     #[test]
     fn it_works() {
         let mut disk = RamDisk::<TEST_BLOCK_SIZE, 4>::new();
@@ -99,6 +110,9 @@ mod tests {
 
         disk.write_from_str(0, TEST_TEXT_3).unwrap();
         disk.read(0, &mut read0).unwrap();
-        assert_eq!(&TEST_TEXT_3[..TEST_BLOCK_SIZE], std::str::from_utf8(&read0).unwrap());
+        assert_eq!(
+            &TEST_TEXT_3[..TEST_BLOCK_SIZE],
+            std::str::from_utf8(&read0).unwrap()
+        );
     }
 }
