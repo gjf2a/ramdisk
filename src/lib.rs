@@ -1,5 +1,27 @@
 #![cfg_attr(not(test), no_std)]
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum RamDiskResult {
+    Ok,
+    IllegalBlock(usize)
+}
+
+impl RamDiskResult {
+    pub fn unwrap(&self) {
+        match self {
+            RamDiskResult::Ok => {}
+            RamDiskResult::IllegalBlock(block) => panic!("Illegal disk block: {block}")
+        }
+    }
+
+    pub fn is_err(&self) -> bool {
+        match self {
+            RamDiskResult::Ok => false,
+            _ => true
+        }
+    }
+}
+
 pub struct RamDisk<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> {
     blocks: [[u8; BLOCK_SIZE]; NUM_BLOCKS]
 }
@@ -7,10 +29,6 @@ pub struct RamDisk<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> {
 impl <const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_BLOCKS> {
     pub fn new() -> Self {
         Self { blocks: [[0; BLOCK_SIZE]; NUM_BLOCKS]}
-    }
-
-    fn input_error() -> acid_io::Error {
-        acid_io::Error::from(acid_io::ErrorKind::InvalidInput)
     }
 
     pub fn num_blocks(&self) -> usize {
@@ -25,26 +43,26 @@ impl <const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_
         NUM_BLOCKS * BLOCK_SIZE
     }
 
-    pub fn read(&self, block: usize, buffer: &mut [u8; BLOCK_SIZE]) -> acid_io::Result<()> {
-        self.blocks.get(block).map_or(Err(Self::input_error()), |found| {
+    pub fn read(&self, block: usize, buffer: &mut [u8; BLOCK_SIZE]) -> RamDiskResult {
+        self.blocks.get(block).map_or(RamDiskResult::IllegalBlock(block), |found| {
             *buffer = *found;
-            Ok(())
+            RamDiskResult::Ok
         })
     }
 
-    pub fn write(&mut self, block: usize, buffer: &[u8; BLOCK_SIZE]) -> acid_io::Result<()> {
-        self.blocks.get_mut(block).map_or(Err(Self::input_error()), |found| {
+    pub fn write(&mut self, block: usize, buffer: &[u8; BLOCK_SIZE]) -> RamDiskResult {
+        self.blocks.get_mut(block).map_or(RamDiskResult::IllegalBlock(block), |found| {
             *found = *buffer;
-            Ok(())
+            RamDiskResult::Ok
         })
     }
 
-    pub fn write_from_str(&mut self, block: usize, contents: &str) -> acid_io::Result<()> {
-        self.blocks.get_mut(block).map_or(Err(Self::input_error()), |found| {
+    pub fn write_from_str(&mut self, block: usize, contents: &str) -> RamDiskResult {
+        self.blocks.get_mut(block).map_or(RamDiskResult::IllegalBlock(block), |found| {
             for (i, byte) in contents.as_bytes().iter().enumerate().take(BLOCK_SIZE) {
                 found[i] = *byte;
             }
-            Ok(())
+            RamDiskResult::Ok
         })
     }
 }
