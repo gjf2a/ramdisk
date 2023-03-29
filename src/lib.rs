@@ -1,6 +1,6 @@
 #![cfg_attr(not(test), no_std)]
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum RamDiskResult {
     Ok,
     IllegalBlock(usize),
