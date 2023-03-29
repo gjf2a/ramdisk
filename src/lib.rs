@@ -22,6 +22,7 @@ impl RamDiskResult {
     }
 }
 
+#[derive(Debug)]
 pub struct RamDisk<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> {
     blocks: [[u8; BLOCK_SIZE]; NUM_BLOCKS],
 }
