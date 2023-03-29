@@ -1,6 +1,6 @@
 #![cfg_attr(not(test), no_std)]
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(core::fmt::Debug, Copy, Clone, Eq, PartialEq)]
 pub enum RamDiskResult {
     Ok,
     IllegalBlock(usize),
@@ -22,7 +22,7 @@ impl RamDiskResult {
     }
 }
 
-#[derive(Debug)]
+#[derive(core::fmt::Debug)]
 pub struct RamDisk<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> {
     blocks: [[u8; BLOCK_SIZE]; NUM_BLOCKS],
 }
