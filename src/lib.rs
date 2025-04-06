@@ -3,8 +3,10 @@ use thiserror_no_std::Error;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Error)]
 pub enum RamDiskError {
-    #[error("Illegal block {0}; maximum block {1}")]
-    IllegalBlock(usize, usize)
+    #[error("Attempt to read block {0}; maximum block {1}")]
+    IllegalBlockRead(usize, usize),
+    #[error("Attempt to write block {0}; maximum block {1}")]
+    IllegalBlockWrite(usize, usize)
 }
 
 impl core::error::Error for RamDiskError {}
@@ -43,7 +45,7 @@ impl<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_B
                 *buffer = *found;
                 Ok(())
             }
-            None => Err(RamDiskError::IllegalBlock(block, self.num_blocks() - 1)),
+            None => Err(RamDiskError::IllegalBlockRead(block, self.num_blocks() - 1)),
         }
     }
 
@@ -53,7 +55,7 @@ impl<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_B
                 *found = *buffer;
                 Ok(())
             }
-            None => Err(RamDiskError::IllegalBlock(block, self.num_blocks() - 1)),
+            None => Err(RamDiskError::IllegalBlockWrite(block, self.num_blocks() - 1)),
         }
     }
 
@@ -65,7 +67,7 @@ impl<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_B
                 }
                 Ok(())
             }
-            None => Err(RamDiskError::IllegalBlock(block, self.num_blocks() - 1)),
+            None => Err(RamDiskError::IllegalBlockWrite(block, self.num_blocks() - 1)),
         }
     }
 }
