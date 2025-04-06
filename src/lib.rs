@@ -9,7 +9,7 @@ pub enum RamDiskError {
 
 impl core::error::Error for RamDiskError {}
 
-#[derive(core::fmt::Debug)]
+#[derive(core::fmt::Debug, Copy, Clone)]
 pub struct RamDisk<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> {
     blocks: [[u8; BLOCK_SIZE]; NUM_BLOCKS],
 }
