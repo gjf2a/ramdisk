@@ -21,6 +21,10 @@ impl<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_B
         }
     }
 
+    pub fn blocks(blocks: [[u8; BLOCK_SIZE]; NUM_BLOCKS]) -> Self {
+        Self {blocks}
+    }
+
     pub fn num_blocks(&self) -> usize {
         NUM_BLOCKS
     }
