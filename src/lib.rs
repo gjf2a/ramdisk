@@ -1,5 +1,6 @@
 #![cfg_attr(not(test), no_std)]
 use thiserror_no_std::Error;
+use core::result::Result;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Error)]
 pub enum RamDiskError {
@@ -39,7 +40,7 @@ impl<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_B
         NUM_BLOCKS * BLOCK_SIZE
     }
 
-    pub fn read(&self, block: usize, buffer: &mut [u8; BLOCK_SIZE]) -> anyhow::Result<(), RamDiskError> {
+    pub fn read(&self, block: usize, buffer: &mut [u8; BLOCK_SIZE]) -> Result<(), RamDiskError> {
         match self.blocks.get(block) {
             Some(found) => {
                 *buffer = *found;
@@ -49,7 +50,7 @@ impl<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_B
         }
     }
 
-    pub fn write(&mut self, block: usize, buffer: &[u8; BLOCK_SIZE]) -> anyhow::Result<(), RamDiskError> {
+    pub fn write(&mut self, block: usize, buffer: &[u8; BLOCK_SIZE]) -> Result<(), RamDiskError> {
         match self.blocks.get_mut(block) {
             Some(found) => {
                 *found = *buffer;
@@ -59,7 +60,7 @@ impl<const BLOCK_SIZE: usize, const NUM_BLOCKS: usize> RamDisk<BLOCK_SIZE, NUM_B
         }
     }
 
-    pub fn write_from_str(&mut self, block: usize, contents: &str) -> anyhow::Result<(), RamDiskError> {
+    pub fn write_from_str(&mut self, block: usize, contents: &str) -> Result<(), RamDiskError> {
         match self.blocks.get_mut(block) {
             Some(found) => {
                 for (i, byte) in contents.as_bytes().iter().enumerate().take(BLOCK_SIZE) {

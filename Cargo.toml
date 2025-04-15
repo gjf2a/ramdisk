@@ -1,10 +1,9 @@
 [package]
 name = "ramdisk"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = { version = "1.0", default-features = false }
 thiserror-no-std = "2.0.2"
